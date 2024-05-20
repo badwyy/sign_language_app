@@ -1,0 +1,123 @@
+import 'package:flutter/material.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+
+class Gallery extends StatefulWidget {
+  const Gallery({Key? key});
+
+  @override
+  State<Gallery> createState() => _GalleryState();
+}
+
+class _GalleryState extends State<Gallery> with SingleTickerProviderStateMixin {
+  List<String> imgList = [
+    'lib/images/hello.jpg',
+    'lib/images/family.jpg',
+    'lib/images/goodbye.jpg',
+    'lib/images/house.jpg',
+    'lib/images/no.jpg',
+  ];
+  int _selectedSlider = 1; // Initially display Slider 1
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 500),
+    );
+    _animation = Tween<double>(
+      begin: 0,
+      end: 0.1, // Adjust the end value to change the pointing direction
+    ).animate(_controller);
+  }
+
+  void toggleSlider() {
+    setState(() {
+      _selectedSlider = _selectedSlider == 1 ? 2 : 1; // Toggle between sliders
+    });
+    _controller.forward(from: 0);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color.fromARGB(255, 65, 180, 226), // Light blue
+              Color.fromARGB(255, 0, 91, 218)
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomLeft,
+          ),
+        ),
+        child: ListView(
+          padding: EdgeInsets.symmetric(vertical: 20.0),
+          children: [
+            if (_selectedSlider == 1) // Show Slider 1 if it's selected
+              AspectRatio(
+                aspectRatio: 3 / 2,
+                child: CarouselSlider(
+                  options: CarouselOptions(
+                    height: 400,
+                    initialPage: 0,
+                    autoPlay: true,
+                    onPageChanged: (index, _) {
+                      // setState(() {
+                      //   _currentIndex = index;
+                      // });
+                    },
+                    autoPlayInterval: const Duration(seconds: 8),
+                    enableInfiniteScroll: true,
+                    enlargeCenterPage: true,
+                  ),
+                  items: imgList.map((imageUrl) {
+                    return SizedBox(
+                      width: double.infinity,
+                      child: Image.asset(imageUrl, fit: BoxFit.fill),
+                    );
+                  }).toList(),
+                ),
+              ),
+            if (_selectedSlider == 2) // Show Slider 2 if it's selected
+              AspectRatio(
+                aspectRatio: 9 / 8,
+                child: CarouselSlider.builder(
+                  itemCount: imgList.length,
+                  itemBuilder: (ctx, int index, _) {
+                    return SizedBox(
+                      child: Image.asset(imgList[index], fit: BoxFit.fill),
+                    );
+                  },
+                  options: CarouselOptions(
+                    autoPlay: true,
+                    autoPlayInterval: const Duration(seconds: 8),
+                    enlargeCenterPage: true,
+                    scrollDirection: Axis.vertical,
+                    pauseAutoPlayOnTouch: true,
+                    enableInfiniteScroll: true,
+                    initialPage: 0,
+                  ),
+                ),
+              ),
+            const SizedBox(height: 30),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 140.0),
+              child: RotationTransition(
+                turns: _animation,
+                child: IconButton(
+                  icon: const Icon(Icons.next_plan,
+                      size: 85.0, color: Colors.white),
+                  onPressed: toggleSlider,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
